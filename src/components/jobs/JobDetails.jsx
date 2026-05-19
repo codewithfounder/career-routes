@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function JobDetails() {
     return (
         <>
@@ -10,7 +12,7 @@ function JobDetails() {
                             {/* <!-- Breadcrumb row --> */}
                             <div class="breadcrumb-row">
                                 <ul class="list-inline">
-                                    <li><a href="index.html">Home</a></li>
+                                    <li><Link to="index.html">Home</Link></li>
                                     <li>Job Detail</li>
                                 </ul>
                             </div>
@@ -70,7 +72,7 @@ function JobDetails() {
                                             <li>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,</li>
                                             <li>DexignZone standard dummy text ever since</li>
                                         </ul>
-                                        <a href="jobs-applied-job.html" class="site-button">Apply This Job</a>
+                                        <Link to="jobs-applied-job.html" class="site-button">Apply This Job</Link>
                                     </div>
                                 </div>
                             </div>
@@ -85,7 +87,7 @@ function JobDetails() {
                                     <div class="post-bx">
                                         <div class="d-flex m-b30">
                                             <div class="job-post-info">
-                                                <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                 <ul>
                                                     <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                     <li><i class="far fa-clock"></i> Published 11 months ago</li>
@@ -94,7 +96,7 @@ function JobDetails() {
                                         </div>
                                         <div class="d-flex">
                                             <div class="job-time me-auto">
-                                                <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                             </div>
                                             <div class="salary-bx">
                                                 <span>$1200 - $ 2500</span>
@@ -110,7 +112,7 @@ function JobDetails() {
                                     <div class="post-bx">
                                         <div class="d-flex m-b30">
                                             <div class="job-post-info">
-                                                <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                 <ul>
                                                     <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                     <li><i class="far fa-clock"></i> Published 11 months ago</li>
@@ -119,7 +121,7 @@ function JobDetails() {
                                         </div>
                                         <div class="d-flex">
                                             <div class="job-time me-auto">
-                                                <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                             </div>
                                             <div class="salary-bx">
                                                 <span>$1200 - $ 2500</span>
@@ -135,7 +137,7 @@ function JobDetails() {
                                     <div class="post-bx">
                                         <div class="d-flex m-b30">
                                             <div class="job-post-info">
-                                                <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                 <ul>
                                                     <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                     <li><i class="far fa-clock"></i> Published 11 months ago</li>
@@ -144,7 +146,7 @@ function JobDetails() {
                                         </div>
                                         <div class="d-flex">
                                             <div class="job-time me-auto">
-                                                <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                             </div>
                                             <div class="salary-bx">
                                                 <span>$1200 - $ 2500</span>
