@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function BrowseJobs() {
     return (
         <>
@@ -10,7 +12,7 @@ function BrowseJobs() {
                             {/* <!-- Breadcrumb row --> */}
                             <div class="breadcrumb-row">
                                 <ul class="list-inline">
-                                    <li><a href="index.html">Home</a></li>
+                                    <li><Link to="index.html">Home</Link></li>
                                     <li>Browse Job Filter Grid</li>
                                 </ul>
                             </div>
@@ -82,13 +84,13 @@ function BrowseJobs() {
                             <div class="row">
                                 <div class="col-xl-3 col-lg-4 col-md-5 m-b30">
                                     <aside id="accordion1" class="sticky-top sidebar-filter">
-                                        <h6 class="title"><i class="fa fa-sliders m-r5"></i> Refined By <a href="javascript:void(0);" class="font-12 float-end">Reset All</a></h6>
+                                        <h6 class="title"><i class="fa fa-sliders m-r5"></i> Refined By <Link to="javascript:void(0);" class="font-12 float-end">Reset All</Link></h6>
                                         <div class="panel">
                                             <div class="acod-head">
                                                 <h6 class="acod-title">
-                                                    <a data-bs-toggle="collapse" href="#companies">
+                                                    <Link data-bs-toggle="collapse" to="#companies">
                                                         Companies
-                                                    </a>
+                                                    </Link>
                                                 </h6>
                                             </div>
                                             <div id="companies" class="acod-body collapse show">
@@ -119,9 +121,9 @@ function BrowseJobs() {
                                         <div class="panel">
                                             <div class="acod-head">
                                                 <h6 class="acod-title">
-                                                    <a data-bs-toggle="collapse" href="#experience" class="collapsed" aria-expanded="false">
+                                                    <Link data-bs-toggle="collapse" to="#experience" class="collapsed" aria-expanded="false">
                                                         Experience
-                                                    </a>
+                                                    </Link>
                                                 </h6>
                                             </div>
                                             <div id="experience" class="acod-body collapse">
@@ -152,9 +154,9 @@ function BrowseJobs() {
                                         <div class="panel">
                                             <div class="acod-head">
                                                 <h6 class="acod-title">
-                                                    <a data-bs-toggle="collapse" href="#salary" class="collapsed">
+                                                    <Link data-bs-toggle="collapse" to="#salary" class="collapsed">
                                                         Salary
-                                                    </a>
+                                                    </Link>
                                                 </h6>
                                             </div>
                                             <div id="salary" class="acod-body collapse">
@@ -185,9 +187,9 @@ function BrowseJobs() {
                                         <div class="panel">
                                             <div class="acod-head">
                                                 <h6 class="acod-title">
-                                                    <a data-bs-toggle="collapse" href="#job-function" class="collapsed">
+                                                    <Link data-bs-toggle="collapse" to="#job-function" class="collapsed">
                                                         Job Function
-                                                    </a>
+                                                    </Link>
                                                 </h6>
                                             </div>
                                             <div id="job-function" class="acod-body collapse">
@@ -218,9 +220,9 @@ function BrowseJobs() {
                                         <div class="panel">
                                             <div class="acod-head">
                                                 <h6 class="acod-title">
-                                                    <a data-bs-toggle="collapse" href="#industry" class="collapsed">
+                                                    <Link data-bs-toggle="collapse" to="#industry" class="collapsed">
                                                         Industry
-                                                    </a>
+                                                    </Link>
                                                 </h6>
                                             </div>
                                             <div id="industry" class="acod-body collapse">
@@ -269,35 +271,35 @@ function BrowseJobs() {
                                                     </div>
                                                 </button>
                                                 <div class="dropdown-menu" style={{ maxHeight: "393.667px", overflow: "hidden", minHeight: "124px" }}>
-                                                    <div class="inner show" role="listbox" id="bs-select-2" tabindex="-1" aria-activedescendant="bs-select-2-0" style={{maxHeight: "373.667px", overflowY: "auto", minHeight: "104px"}}>
-                                                        <ul class="dropdown-menu inner show" role="presentation" style={{marginTop: "0px", marginBottom: "0px"}}>
+                                                    <div class="inner show" role="listbox" id="bs-select-2" tabindex="-1" aria-activedescendant="bs-select-2-0" style={{ maxHeight: "373.667px", overflowY: "auto", minHeight: "104px" }}>
+                                                        <ul class="dropdown-menu inner show" role="presentation" style={{ marginTop: "0px", marginBottom: "0px" }}>
                                                             <li class="selected active">
-                                                                <a role="option" class="dropdown-item active selected" id="bs-select-2-0" tabindex="0" aria-setsize="4" aria-posinset="1" aria-selected="true">
+                                                                <Link role="option" class="dropdown-item active selected" id="bs-select-2-0" tabindex="0" aria-setsize="4" aria-posinset="1" aria-selected="true">
                                                                     <span class="text">Last 2 Months</span>
-                                                                </a>
+                                                                </Link>
                                                             </li>
                                                             <li>
-                                                                <a role="option" class="dropdown-item" id="bs-select-2-1" tabindex="0">
+                                                                <Link role="option" class="dropdown-item" id="bs-select-2-1" tabindex="0">
                                                                     <span class="text">Last Months</span>
-                                                                </a>
+                                                                </Link>
                                                             </li>
                                                             <li>
-                                                                <a role="option" class="dropdown-item" id="bs-select-2-2" tabindex="0">
+                                                                <Link role="option" class="dropdown-item" id="bs-select-2-2" tabindex="0">
                                                                     <span class="text">Last Weeks</span>
-                                                                </a>
+                                                                </Link>
                                                             </li>
                                                             <li>
-                                                                <a role="option" class="dropdown-item" id="bs-select-2-3" tabindex="0">
+                                                                <Link role="option" class="dropdown-item" id="bs-select-2-3" tabindex="0">
                                                                     <span class="text">Last 3 Days</span>
-                                                                </a>
+                                                                </Link>
                                                             </li>
                                                         </ul>
                                                     </div>
                                                 </div>
                                             </div>
                                             {/* <div class="float-end p-tb5 p-r10">
-                                                <a href="browse-job-filter-list.html" class="p-lr5"><i class="fa fa-th-list"></i></a>
-                                                <a href="browse-job-filter-grid.html" class="p-lr5"><i class="fa fa-th"></i></a>
+                                                <Link to="browse-job-filter-list.html" class="p-lr5"><i class="fa fa-th-list"></i></Link>
+                                                <Link to="browse-job-filter-grid.html" class="p-lr5"><i class="fa fa-th"></i></Link>
                                             </div> */}
                                         </div>
                                     </div>
@@ -306,7 +308,7 @@ function BrowseJobs() {
                                             <div class="post-bx">
                                                 <div class="d-flex m-b30">
                                                     <div class="job-post-info">
-                                                        <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                         <ul>
                                                             <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                             <li><i class="far fa-bookmark"></i> Full Time</li>
@@ -316,7 +318,7 @@ function BrowseJobs() {
                                                 </div>
                                                 <div class="d-flex">
                                                     <div class="job-time me-auto">
-                                                        <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                                     </div>
                                                     <div class="salary-bx">
                                                         <span>$1200 - $ 2500</span>
@@ -332,7 +334,7 @@ function BrowseJobs() {
                                             <div class="post-bx">
                                                 <div class="d-flex m-b30">
                                                     <div class="job-post-info">
-                                                        <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                         <ul>
                                                             <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                             <li><i class="far fa-bookmark"></i> Full Time</li>
@@ -342,7 +344,7 @@ function BrowseJobs() {
                                                 </div>
                                                 <div class="d-flex">
                                                     <div class="job-time me-auto">
-                                                        <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                                     </div>
                                                     <div class="salary-bx">
                                                         <span>$1200 - $ 2500</span>
@@ -358,7 +360,7 @@ function BrowseJobs() {
                                             <div class="post-bx">
                                                 <div class="d-flex m-b30">
                                                     <div class="job-post-info">
-                                                        <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                         <ul>
                                                             <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                             <li><i class="far fa-bookmark"></i> Full Time</li>
@@ -368,7 +370,7 @@ function BrowseJobs() {
                                                 </div>
                                                 <div class="d-flex">
                                                     <div class="job-time me-auto">
-                                                        <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                                     </div>
                                                     <div class="salary-bx">
                                                         <span>$1200 - $ 2500</span>
@@ -384,7 +386,7 @@ function BrowseJobs() {
                                             <div class="post-bx">
                                                 <div class="d-flex m-b30">
                                                     <div class="job-post-info">
-                                                        <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                         <ul>
                                                             <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                             <li><i class="far fa-bookmark"></i> Full Time</li>
@@ -394,7 +396,7 @@ function BrowseJobs() {
                                                 </div>
                                                 <div class="d-flex">
                                                     <div class="job-time me-auto">
-                                                        <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                                     </div>
                                                     <div class="salary-bx">
                                                         <span>$1200 - $ 2500</span>
@@ -410,7 +412,7 @@ function BrowseJobs() {
                                             <div class="post-bx">
                                                 <div class="d-flex m-b30">
                                                     <div class="job-post-info">
-                                                        <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                         <ul>
                                                             <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                             <li><i class="far fa-bookmark"></i> Full Time</li>
@@ -420,7 +422,7 @@ function BrowseJobs() {
                                                 </div>
                                                 <div class="d-flex">
                                                     <div class="job-time me-auto">
-                                                        <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                                     </div>
                                                     <div class="salary-bx">
                                                         <span>$1200 - $ 2500</span>
@@ -436,7 +438,7 @@ function BrowseJobs() {
                                             <div class="post-bx">
                                                 <div class="d-flex m-b30">
                                                     <div class="job-post-info">
-                                                        <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                         <ul>
                                                             <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                             <li><i class="far fa-bookmark"></i> Full Time</li>
@@ -446,7 +448,7 @@ function BrowseJobs() {
                                                 </div>
                                                 <div class="d-flex">
                                                     <div class="job-time me-auto">
-                                                        <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                                     </div>
                                                     <div class="salary-bx">
                                                         <span>$1200 - $ 2500</span>
@@ -462,7 +464,7 @@ function BrowseJobs() {
                                             <div class="post-bx">
                                                 <div class="d-flex m-b30">
                                                     <div class="job-post-info">
-                                                        <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                         <ul>
                                                             <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                             <li><i class="far fa-bookmark"></i> Full Time</li>
@@ -472,7 +474,7 @@ function BrowseJobs() {
                                                 </div>
                                                 <div class="d-flex">
                                                     <div class="job-time me-auto">
-                                                        <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                                     </div>
                                                     <div class="salary-bx">
                                                         <span>$1200 - $ 2500</span>
@@ -488,7 +490,7 @@ function BrowseJobs() {
                                             <div class="post-bx">
                                                 <div class="d-flex m-b30">
                                                     <div class="job-post-info">
-                                                        <h5><a href="/job-deails">Digital Marketing Executive</a></h5>
+                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
                                                         <ul>
                                                             <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
                                                             <li><i class="far fa-bookmark"></i> Full Time</li>
@@ -498,7 +500,7 @@ function BrowseJobs() {
                                                 </div>
                                                 <div class="d-flex">
                                                     <div class="job-time me-auto">
-                                                        <a href="javascript:void(0);"><span>Full Time</span></a>
+                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
                                                     </div>
                                                     <div class="salary-bx">
                                                         <span>$1200 - $ 2500</span>
@@ -513,11 +515,11 @@ function BrowseJobs() {
                                     </ul>
                                     <div class="pagination-bx float-end m-t30">
                                         <ul class="pagination">
-                                            <li class="previous"><a href="javascript:void(0);"><i class="ti-arrow-left"></i> Prev</a></li>
-                                            <li class="active"><a href="javascript:void(0);">1</a></li>
-                                            <li><a href="javascript:void(0);">2</a></li>
-                                            <li><a href="javascript:void(0);">3</a></li>
-                                            <li class="next"><a href="javascript:void(0);">Next <i class="ti-arrow-right"></i></a></li>
+                                            <li class="previous"><Link to="javascript:void(0);"><i class="ti-arrow-left"></i> Prev</Link></li>
+                                            <li class="active"><Link to="javascript:void(0);">1</Link></li>
+                                            <li><Link to="javascript:void(0);">2</Link></li>
+                                            <li><Link to="javascript:void(0);">3</Link></li>
+                                            <li class="next"><Link to="javascript:void(0);">Next <i class="ti-arrow-right"></i></Link></li>
                                         </ul>
                                     </div>
                                 </div>
