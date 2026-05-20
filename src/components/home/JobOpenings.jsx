@@ -102,7 +102,7 @@ function JobOpenings() {
                                         : company.desc}
                                 </p>
 
-                                <a href="/" className="job-view-btn py-0 text-center" >
+                                <a href="/" className="job-view-btn py-0" >
                                     View jobs
                                     <span>›</span>
                                 </a>
