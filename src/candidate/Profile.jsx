@@ -15,6 +15,9 @@ function Profile() {
     const [selectedCountry, setSelectedCountry] = useState("");
     const [selectedState, setSelectedState] = useState("");
 
+    const [industries, setIndustries] = useState([]);
+    const [departments, setDepartments] = useState([]);
+
     useEffect(() => {
         fetch(`${BASE_URL}/auth/profile/${id}`)
             .then((res) => res.json())

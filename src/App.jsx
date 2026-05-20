@@ -91,7 +91,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgetpassword" element={<VerifyEmail />} />
         <Route path="/browse-jobs" element={<BrowseJobs />} />
-        <Route path="/job-deails" element={<JobDetails />} />
+        <Route path="/job-details/:id" element={<JobDetails />} />
         <Route path="/profile/:id" element={<Profile />} />
       </Routes>
       <Footer />

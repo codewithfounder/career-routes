@@ -1,10 +1,15 @@
 import AboutWork from "../components/home/AboutWork";
 import BannerSection from "../components/home/BannerSection";
+import HiringBanner from "../components/home/HiringBanner";
 import JobCategory from "../components/home/JobCategory";
+import JobOpenings from "../components/home/JobOpenings";
 import LatestJobs from "../components/home/LatestJobs";
 import OurJob from "../components/home/OurJob";
 import Partners from "../components/home/Partners";
+import PopularSearch from "../components/home/PopularSearch";
 import Testimonial from "../components/home/Testimonial";
+import Testimonials2 from "../components/home/Testimonials2";
+import TrendingJobs from "../components/home/TrendingJobs";
 
 function Home() {
     return (
@@ -15,18 +20,22 @@ function Home() {
                 {/*<!-- Partners --> */}
                 <Partners />
                 {/* <!-- About Work --> */}
-                <AboutWork />
+                {/* <AboutWork /> */}
+                <PopularSearch />
                 {/* <!-- Our Job --> */}
-                {/* <OurJob /> */}
+                <OurJob />
                 {/*<!-- Job Category --> */}
                 <JobCategory />
+                <TrendingJobs />
+                <JobOpenings />
                 {/* <!-- Latest jobs --> */}
                 <LatestJobs />
                 {/* <!-- Reviews Testimonial --> */}
-                <Testimonial />
+                <Testimonials2 />
+                {/* <Testimonial /> */}
             </div>
             {/* <!-- Modal Box --> */}
-            <div class="section-full find-jobs">
+            {/* <div class="section-full find-jobs">
                 <div class="container">
                     <div class="find-jobs-inner">
                         <div class="section-head style-1">
@@ -40,7 +49,8 @@ function Home() {
                         </a>
                     </div>
                 </div>
-            </div>
+            </div> */}
+            <HiringBanner />
         </>
     )
 }

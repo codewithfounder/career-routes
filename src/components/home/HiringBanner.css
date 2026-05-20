@@ -1,0 +1,152 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: #f2f2f2;
+}
+
+.banner-wrapper {
+    padding: 80px 20px;
+
+    display: flex;
+    justify-content: center;
+}
+
+.banner {
+    width: 100%;
+    max-width: 1000px;
+
+    min-height: 380px;
+
+    background: #eef7f5;
+    border: 1px solid #d6e4e1;
+    border-radius: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    overflow: hidden;
+
+    padding: 0;
+}
+
+/* LEFT */
+
+.banner-left {
+    width: 45%;
+    height: 100%;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.banner-left img {
+    width: 100%;
+    max-width: 420px;
+    object-fit: contain;
+}
+
+/* RIGHT */
+
+.banner-right {
+    width: 45%;
+}
+
+.tag {
+    display: inline-block;
+
+    background: #e7f0ee;
+    color: #2e55fa;
+
+    padding: 14px 18px;
+    border-radius: 6px;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    margin-bottom: 35px;
+}
+
+.banner-right h1 {
+    font-size: 56px;
+    line-height: 1.1;
+
+    color: #2e55fa;
+
+    margin-bottom: 22px;
+}
+
+.banner-right p {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.5;
+
+    color: #000;
+
+    margin-bottom: 40px;
+}
+
+.btn-banner {
+    width: 300px;
+    height: 58px;
+
+    border: 1px solid #2e55fa;
+    border-radius: 6px;
+
+    background: #fff;
+    color: #2e55fa;
+
+    font-size: 24px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .3s;
+}
+
+.btn-banner:hover {
+    background: #2e55fa;
+    color: #fff;
+}
+
+/* responsive */
+
+@media(max-width:900px) {
+
+    .banner {
+        flex-direction: column;
+
+        padding: 30px;
+        text-align: center;
+
+        min-height: auto;
+    }
+
+    .banner-left,
+    .banner-right {
+        width: 100%;
+    }
+
+    .banner-left {
+        margin-bottom: 30px;
+    }
+
+    .banner-right h1 {
+        font-size: 40px;
+    }
+
+    .banner-right p {
+        font-size: 18px;
+    }
+
+    .btn-banner {
+        width: 100%;
+    }
+
+}

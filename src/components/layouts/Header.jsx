@@ -21,30 +21,25 @@ function Header() {
                             </div>
                             {/* <!-- Nav Toggle Button --> */}
                             <button aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation" className="navbar-toggler collapsed navicon justify-content-end" data-bs-target="#navbarNavDropdown" data-bs-toggle="collapse" type="button">
-                                <span>
-                                </span>
-                                <span>
-                                </span>
-                                <span>
-                                </span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
                             </button>
                             {/* <!-- Extra Nav --> */}
                             <div className="extra-nav">
                                 <div className="extra-cell">
-                                    <Link className="layout-btn" to="javascript:void(0);">
+                                    {/* <Link className="layout-btn" to="javascript:void(0);">
                                         <input type="checkbox" />
                                         <span className="mode-label">
                                         </span>
-                                    </Link>
-                                    <Link className="site-button" to="/signup">
-                                        <i className="fa fa-user">
-                                        </i>
-                                        Sign Up
-                                    </Link>
+                                    </Link> */}
+                                    <a href="https://websmileindia.in/CAREERROUTES/admin/auth/signin" className="text-dark" target="_blank">
+                                        {/* <i className="fa fa-user"></i> */}
+                                        Employer Login
+                                    </a>
                                     <Link className="site-button" to="/login">
-                                        <i className="fa fa-lock">
-                                        </i>
-                                        login
+                                        {/* <i className="fa fa-lock"></i> */}
+                                        Candidate Login
                                     </Link>
                                 </div>
                             </div>
@@ -61,34 +56,30 @@ function Header() {
                                     </Link>
                                 </div>
                                 <ul className="nav navbar-nav">
-                                    <li>
+                                    {/* <li>
                                         <Link to="/">
                                             Home
+                                        </Link>
+                                    </li> */}
+                                    <li>
+                                        <Link to="/browse-jobs">
+                                            About Us
                                         </Link>
                                     </li>
                                     <li>
                                         <Link to="/browse-jobs">
-                                            Jobs
+                                            Browse Jobs
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link to="javascript:void(0);">
-                                            Auth
-                                            <i className="fa fa-chevron-down">
-                                            </i>
+                                        <Link to="/browse-jobs">
+                                            Companies
                                         </Link>
-                                        <ul className="sub-menu">
-                                            <li>
-                                                <Link className="dez-page" to="/signup">
-                                                    Register
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="/login">
-                                                    Login
-                                                </Link>
-                                            </li>
-                                        </ul>
+                                    </li>
+                                    <li>
+                                        <Link to="/browse-jobs">
+                                            Pricing
+                                        </Link>
                                     </li>
                                     {/* <li>
                                         <Link to="javascript:void(0);">

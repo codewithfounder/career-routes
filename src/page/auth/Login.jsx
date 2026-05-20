@@ -90,8 +90,28 @@ function Login() {
                                             <input name="password" required className="form-control " placeholder="Type Password" type="password" value={formData.password} onChange={handleChange} />
                                         </div>
                                         <div className="text-left">
-                                            <button className="site-button m-r5 button-lg" type="submit" disabled={loading}>{loading ? "Please Wait..." : "Login"}</button>
-                                            <Link to="/forgetpassword" className="m-l5 m-t15 forget-pass float-end"><i className="fa fa-unlock-alt"></i> Forgot Password</Link>
+                                            <button
+                                                className="site-button m-r5 button-lg"
+                                                type="submit"
+                                                disabled={loading}
+                                            >
+                                                {loading ? "Please Wait..." : "Login"}
+                                            </button>
+
+                                            <Link
+                                                to="/forgetpassword"
+                                                className="m-l5 m-t15 forget-pass float-end"
+                                            >
+                                                <i className="fa fa-unlock-alt"></i> Forgot Password
+                                            </Link>
+
+                                            <div className="m-t20">
+                                                <span>Don't have an account? </span>
+
+                                                <Link to="/signup" className="text-primary font-weight-600">
+                                                    Register Here
+                                                </Link>
+                                            </div>
                                         </div>
                                     </form>
                                 </div>
