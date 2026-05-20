@@ -32,6 +32,7 @@ body {
 }
 
 .swiper-slide {
+    width: 348.762px !important;
     height: auto;
 }
 
@@ -82,9 +83,9 @@ body {
     font-size: 22px;
     font-weight: 600;
     color: #2e55fa;
-
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
 }
 

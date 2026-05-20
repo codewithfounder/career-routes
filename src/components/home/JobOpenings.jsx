@@ -83,7 +83,7 @@ function JobOpenings() {
                     }}
                 >
                     {companies.map((company) => (
-                        <SwiperSlide key={company.id}>
+                        <SwiperSlide key={company.id} style={{ width: "340px !important" }}>
                             <div className="job-single-card">
 
                                 <img
@@ -102,7 +102,7 @@ function JobOpenings() {
                                         : company.desc}
                                 </p>
 
-                                <a href="/" className="job-view-btn">
+                                <a href="/" className="job-view-btn py-0 text-center" >
                                     View jobs
                                     <span>›</span>
                                 </a>
