@@ -25,7 +25,7 @@ function ProfileForm({ userId, userData, onUpdate }) {
             setUser(userData);
             setSelectedCountry(userData.Country || "");
             setSelectedState(userData.State || "");
-            
+
             if (userData.Industry && userData.Industry !== '') {
                 fetchDepartmentsByIndustry(userData.Industry);
             }
@@ -37,12 +37,12 @@ function ProfileForm({ userId, userData, onUpdate }) {
             setDepartments([]);
             return;
         }
-        
+
         setLoadingDepartments(true);
         try {
             const response = await fetch(`${BASE_URL}/auth/departments?industry_id=${industryId}`);
             const data = await response.json();
-            
+
             if (data.status) {
                 setDepartments(data.data);
             } else {
@@ -110,12 +110,12 @@ function ProfileForm({ userId, userData, onUpdate }) {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        
+
         setUser({
             ...user,
             [name]: value,
         });
-        
+
         if (name === 'Industry') {
             fetchDepartmentsByIndustry(value);
             setUser(prev => ({
@@ -415,7 +415,7 @@ function ProfileForm({ userId, userData, onUpdate }) {
                                         <option value="">Select Industry</option>
                                         {industries.map((item) => (
                                             <option key={item.id} value={item.id}>
-                                                {item.name}
+                                                {item.Title}
                                             </option>
                                         ))}
                                     </select>
@@ -435,7 +435,7 @@ function ProfileForm({ userId, userData, onUpdate }) {
                                         <option value="">Select Department</option>
                                         {departments.map((item) => (
                                             <option key={item.id} value={item.id}>
-                                                {item.name}
+                                                {item.Title}
                                             </option>
                                         ))}
                                     </select>
@@ -498,11 +498,11 @@ function ProfileForm({ userId, userData, onUpdate }) {
                             <div className="col-lg-12 col-md-12">
                                 <div className="form-group">
                                     <label>Highest Qualification:</label>
-                                    <select 
-                                        name="Highest_qualification" 
-                                        value={user.Highest_qualification || ""} 
-                                        onChange={handleChange} 
-                                        className="form-control" 
+                                    <select
+                                        name="Highest_qualification"
+                                        value={user.Highest_qualification || ""}
+                                        onChange={handleChange}
+                                        className="form-control"
                                         required
                                     >
                                         <option value="">Select Qualification</option>
