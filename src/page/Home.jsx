@@ -14,7 +14,7 @@ import TrendingJobs from "../components/home/TrendingJobs";
 function Home() {
     return (
         <>
-            <div class="page-content">
+            <div className="page-content">
                 {/* <!-- Section Banner --> */}
                 <BannerSection />
                 {/*<!-- Partners --> */}
@@ -35,16 +35,16 @@ function Home() {
                 {/* <Testimonial /> */}
             </div>
             {/* <!-- Modal Box --> */}
-            {/* <div class="section-full find-jobs">
-                <div class="container">
-                    <div class="find-jobs-inner">
-                        <div class="section-head style-1">
+            {/* <div className="section-full find-jobs">
+                <div className="container">
+                    <div className="find-jobs-inner">
+                        <div className="section-head style-1">
                             <h3>
                                 Let’s Get Connected And Start
                                 Finding Your Dream Job
                             </h3>
                         </div>
-                        <a class="site-button style-1" href="javascript:void(0);">
+                        <a className="site-button style-1" href="javascript:void(0);">
                             Click Here
                         </a>
                     </div>

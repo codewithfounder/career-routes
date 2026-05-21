@@ -9,10 +9,18 @@ import Login from "./page/auth/Login";
 import VerifyEmail from "./page/auth/forgetpasword/VerifyEmail";
 import BrowseJobs from "./components/jobs/BrowseJobs";
 import JobDetails from "./components/jobs/JobDetails";
-import Profile from "./candidate/Profile";
+import ProfileLayout from "./candidate/ProfileLayout";
+import AppliedJobs from "./candidate/AppliedJobs";
+import SavedJobs from "./candidate/SavedJobs";
+import ChangePassword from "./candidate/ChangePassword";
+
+// import Profile from "./candidate/Profile";
 import VerifyOtp from "./page/auth/register/VerifyOtp";
 
 import ScrollToTop from "./ScrollToTop";
+import { ToastProvider } from "./context/ToastContext";
+import ProfileInfo from "./candidate/ProfileInfo";
+import About from "./page/About";
 
 const scripts = [
   "/js/jquery.min.js",
@@ -81,22 +89,31 @@ export default function App() {
   }, []);
 
   return (
-    <div className="page-wraper bg-white">
-      <Header />
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgetpassword" element={<VerifyEmail />} />
-        <Route path="/browse-jobs" element={<BrowseJobs />} />
-        <Route path="/job-details/:id" element={<JobDetails />} />
-        <Route path="/profile/:id" element={<Profile />} />
-      </Routes>
-      <Footer />
-      {/* <!-- scroll top button --> */}
-      <button className="scroltop fa fa-arrow-up"></button>
-    </div>
+    <ToastProvider>
+      <div className="page-wraper bg-white">
+        <Header />
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgetpassword" element={<VerifyEmail />} />
+          <Route path="/browse-jobs" element={<BrowseJobs />} />
+          <Route path="/job-details/:id" element={<JobDetails />} />
+          <Route path="/about" element={<About />} />
+          
+          <Route path="/profile/:token" element={<ProfileLayout />}>
+            {/* <Route index element={<ProfileInfo />} /> */}
+            <Route index element={<ProfileInfo/>}/>
+            <Route path="applied-jobs" element={<AppliedJobs />} />
+            <Route path="saved-jobs" element={<SavedJobs />} />
+            <Route path="change-password" element={<ChangePassword />} />
+          </Route>
+        </Routes>
+        <Footer />
+        <button className="scroltop fa fa-arrow-up"></button>
+      </div>
+    </ToastProvider>
   );
 }

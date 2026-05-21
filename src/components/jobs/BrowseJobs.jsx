@@ -1,532 +1,249 @@
+import { useState, useEffect } from 'react'
 import { Link } from "react-router-dom";
+import FilterSearch from './filter/FilterSearch';
+import FilterByMonth from './filter/FilterByMonth';
+import NavigationBar from './navigation/NavigationBar';
+import axios from 'axios';
+import { BASE_URL } from '../../config/api';
+import { useToast } from '../../context/ToastContext';
 
 function BrowseJobs() {
+    const { showToast } = useToast();
+    const [jobs, setJobs] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [savedJobs, setSavedJobs] = useState({});
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    const jobsPerPage = 9;
+
+    useEffect(() => {
+        const token = localStorage.getItem("auth_token");
+        setIsLoggedIn(!!token);
+        fetchLatestJobs();
+    }, [])
+
+    // Check saved status for all jobs
+    useEffect(() => {
+        if (jobs.length > 0 && isLoggedIn) {
+            checkSavedStatusForJobs();
+        }
+    }, [jobs, isLoggedIn]);
+
+    const fetchLatestJobs = async () => {
+        try {
+            const response = await axios.get(
+                `${BASE_URL}/jobs/latest_jobs`
+            );
+
+            if (response.data.status) {
+                setJobs(response.data.data);
+            }
+        } catch (error) {
+            console.log(error);
+            showToast("Failed to load jobs", "error");
+        }
+    };
+
+    const checkSavedStatusForJobs = async () => {
+        const token = localStorage.getItem("auth_token");
+        if (!token) return;
+
+        try {
+            // Check saved status for each job
+            const savedStatusMap = {};
+            
+            for (const job of jobs) {
+                const response = await axios.post(
+                    `${BASE_URL}/jobs/check_saved_job`,
+                    {
+                        job_id: job.id,
+                        token: token
+                    }
+                );
+                
+                if (response.data.status) {
+                    savedStatusMap[job.id] = response.data.is_saved;
+                }
+            }
+            
+            setSavedJobs(savedStatusMap);
+        } catch (error) {
+            console.log("Error checking saved status:", error);
+        }
+    };
+
+    const handleSaveJob = async (jobId, event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const token = localStorage.getItem("auth_token");
+        
+        if (!token) {
+            showToast("Please login to save jobs", "error");
+            return;
+        }
+        
+        const isCurrentlySaved = savedJobs[jobId];
+        const url = isCurrentlySaved 
+            ? `${BASE_URL}/jobs/remove_saved_job` 
+            : `${BASE_URL}/jobs/save_job`;
+        
+        try {
+            const response = await axios.post(url, {
+                job_id: jobId,
+                token: token
+            });
+            
+            if (response.data.status) {
+                setSavedJobs(prev => ({
+                    ...prev,
+                    [jobId]: !isCurrentlySaved
+                }));
+                showToast(response.data.message, "success");
+            } else {
+                showToast(response.data.message, "error");
+            }
+        } catch (error) {
+            console.error("Error saving job:", error);
+            showToast("Something went wrong", "error");
+        }
+    };
+
+    const getTimeAgo = (date) => {
+        const now = new Date();
+        const postDate = new Date(date);
+
+        const seconds = Math.floor((now - postDate) / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(seconds / 3600);
+        const days = Math.floor(seconds / 86400);
+
+        if (seconds < 60) {
+            return `${seconds} seconds ago`;
+        } else if (minutes < 60) {
+            return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+        } else if (hours < 24) {
+            return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+        } else {
+            return `${days} day${days > 1 ? "s" : ""} ago`;
+        }
+    };
+
+    // Pagination Logic
+    const indexOfLastJob = currentPage * jobsPerPage;
+    const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+    const currentJobs = jobs.slice(
+        indexOfFirstJob,
+        indexOfLastJob
+    );
+
+    const totalPages = Math.ceil(
+        jobs.length / jobsPerPage
+    );
+
     return (
         <>
-            <div class="page-content bg-white">
-                {/* <!-- inner page banner --> */}
-                <div class="dez-bnr-inr overlay-black-middle" style={{ backgroundImage: "url(images/banner/bnr1.jpg)" }}>
-                    <div class="container">
-                        <div class="dez-bnr-inr-entry">
-                            <h1 class="text-white">Browse Job Filter Grid</h1>
-                            {/* <!-- Breadcrumb row --> */}
-                            <div class="breadcrumb-row">
-                                <ul class="list-inline">
-                                    <li><Link to="index.html">Home</Link></li>
+            <div className="page-content bg-white">
+
+                {/* inner page banner */}
+                <div
+                    className="dez-bnr-inr overlay-black-middle"
+                    style={{
+                        backgroundImage:
+                            "url(images/banner/bnr1.jpg)"
+                    }}
+                >
+                    <div className="container">
+                        <div className="dez-bnr-inr-entry">
+                            <h1 className="text-white">
+                                Browse Job Filter Grid
+                            </h1>
+                            <div className="breadcrumb-row">
+                                <ul className="list-inline">
+                                    <li>
+                                        <Link to="/">Home</Link>
+                                    </li>
                                     <li>Browse Job Filter Grid</li>
                                 </ul>
                             </div>
-                            {/* <!-- Breadcrumb row END --> */}
                         </div>
                     </div>
                 </div>
-                {/* <!-- inner page banner END -->
-		<!-- Filters Search --> */}
-                <div class="section-full browse-job-find">
-                    <div class="container">
-                        <div class="find-job-bx">
-                            <form class="dezPlaceAni">
-                                <div class="row">
-                                    <div class="col-lg-4 col-md-6">
-                                        <div class="form-group">
-                                            <label>Job Title, Keywords, or Phrase</label>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" placeholder="" />
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text"><i class="fa fa-search"></i></span>
+
+                <FilterSearch />
+
+                <div className="section-full bg-white p-b50">
+                    <div className="container">
+                        <FilterByMonth />
+
+                        <ul className="post-job-bx browse-job-grid row">
+                            {currentJobs.length > 0 ? (
+                                currentJobs.map((job, index) => (
+                                    <li
+                                        className="col-lg-4 col-md-6"
+                                        key={job.id || index}
+                                    >
+                                        <div className="post-bx">
+                                            <div className="d-flex m-b30">
+                                                <div className="job-post-info">
+                                                    <h5>
+                                                        <Link to={`/job-details/${job.id}`}>
+                                                            {job.Title}
+                                                        </Link>
+                                                    </h5>
+                                                    <ul>
+                                                        <li>
+                                                            <i className="fas fa-map-marker-alt"></i>
+                                                            {" "}{job.Location}
+                                                        </li>
+                                                        <li>
+                                                            <i className="far fa-bookmark"></i>
+                                                            {" "}{job.Job_type}
+                                                        </li>
+                                                        <li>
+                                                            <i className="far fa-clock"></i>
+                                                            {" "}{getTimeAgo(job.Post_date)}
+                                                        </li>
+                                                    </ul>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6">
-                                        <div class="form-group">
-                                            <label>City, State or ZIP</label>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" placeholder="" />
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+
+                                            <div className="d-flex">
+                                                <div className="job-time me-auto">
+                                                    <Link to={`/job-details/${job.id}`}>
+                                                        <span>{job.Job_type}</span>
+                                                    </Link>
+                                                </div>
+                                                <div className="salary-bx">
+                                                    <span>₹ {job.Salary} LPA</span>
                                                 </div>
                                             </div>
+
+                                            <label className="like-btn">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={savedJobs[job.id] || false}
+                                                    onChange={(e) => handleSaveJob(job.id, e)}
+                                                />
+                                                <span className="checkmark"></span>
+                                            </label>
                                         </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6">
-                                        <div class="form-group">
-                                            <div class="dropdown bootstrap-select"><select class="">
-                                                <option>Select Sector</option>
-                                                <option>Construction</option>
-                                                <option>Corodinator</option>
-                                                <option>Employer</option>
-                                                <option>Financial Career</option>
-                                                <option>Information Technology</option>
-                                                <option>Marketing</option>
-                                                <option>Quality check</option>
-                                                <option>Real Estate</option>
-                                                <option>Sales</option>
-                                                <option>Supporting</option>
-                                                <option>Teaching</option>
-                                            </select><button type="button" tabindex="-1" class="btn dropdown-toggle btn-light" data-bs-toggle="dropdown" role="combobox" aria-owns="bs-select-1" aria-haspopup="listbox" aria-expanded="false" title="Select Sector"><div class="filter-option"><div class="filter-option-inner"><div class="filter-option-inner-inner">Select Sector</div></div> </div></button><div class="dropdown-menu "><div class="inner show" role="listbox" id="bs-select-1" tabindex="-1"><ul class="dropdown-menu inner show" role="presentation"></ul></div></div></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-2 col-md-6">
-                                        <button type="submit" class="site-button btn-block">Find Job</button>
-                                    </div>
+                                    </li>
+                                ))
+                            ) : (
+                                <div className="text-center py-5">
+                                    <h4>No jobs found</h4>
+                                    <p>Please check back later.</p>
                                 </div>
-                            </form>
-                        </div>
+                            )}
+                        </ul>
+
+                        <NavigationBar
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            setCurrentPage={setCurrentPage}
+                        />
                     </div>
-                </div>
-                {/* <!-- Filters Search END -->
-        <!-- contact area --> */}
-                <div class="content-block">
-                    {/* <!-- Browse Jobs --> */}
-                    <div class="section-full browse-job p-b50">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-xl-3 col-lg-4 col-md-5 m-b30">
-                                    <aside id="accordion1" class="sticky-top sidebar-filter">
-                                        <h6 class="title"><i class="fa fa-sliders m-r5"></i> Refined By <Link to="javascript:void(0);" class="font-12 float-end">Reset All</Link></h6>
-                                        <div class="panel">
-                                            <div class="acod-head">
-                                                <h6 class="acod-title">
-                                                    <Link data-bs-toggle="collapse" to="#companies">
-                                                        Companies
-                                                    </Link>
-                                                </h6>
-                                            </div>
-                                            <div id="companies" class="acod-body collapse show">
-                                                <div class="acod-content">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="companies1" type="checkbox" name="checkbox-companies" />
-                                                        <label class="form-check-label" for="companies1">Job Mirror Consultancy <span>(50)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="companies2" type="checkbox" name="checkbox-companies" />
-                                                        <label class="form-check-label" for="companies2">Engineering Group <span>(80)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="companies3" type="checkbox" name="checkbox-companies" />
-                                                        <label class="form-check-label" for="companies3">Electric Co. <span>(235)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="companies4" type="checkbox" name="checkbox-companies" />
-                                                        <label class="form-check-label" for="companies4">Telecom industry <span>(568)</span></label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="companies5" type="checkbox" name="checkbox-companies" />
-                                                        <label class="form-check-label" for="companies5">Safety/ Health <span>(798)</span></label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="panel">
-                                            <div class="acod-head">
-                                                <h6 class="acod-title">
-                                                    <Link data-bs-toggle="collapse" to="#experience" class="collapsed" aria-expanded="false">
-                                                        Experience
-                                                    </Link>
-                                                </h6>
-                                            </div>
-                                            <div id="experience" class="acod-body collapse">
-                                                <div class="acod-content">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="one-years" type="radio" name="radio-years" />
-                                                        <label class="form-check-label" for="one-years">0-1 Years <span>(120)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="two-years" type="radio" name="radio-years" />
-                                                        <label class="form-check-label" for="two-years">1-2 Years <span>(300)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="three-years" type="radio" name="radio-years" />
-                                                        <label class="form-check-label" for="three-years">2-3 Years <span>(235)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="four-years" type="radio" name="radio-years" />
-                                                        <label class="form-check-label" for="four-years">3-4 Years <span>(568)</span></label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="five-years" type="radio" name="radio-years" />
-                                                        <label class="form-check-label" for="five-years">4-5 Years <span>(798)</span></label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="panel">
-                                            <div class="acod-head">
-                                                <h6 class="acod-title">
-                                                    <Link data-bs-toggle="collapse" to="#salary" class="collapsed">
-                                                        Salary
-                                                    </Link>
-                                                </h6>
-                                            </div>
-                                            <div id="salary" class="acod-body collapse">
-                                                <div class="acod-content">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="salary-op1" type="radio" name="radio-currency" />
-                                                        <label class="form-check-label" for="salary-op1">0-1 lacs <span>(120)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="salary-op2" type="radio" name="radio-currency" />
-                                                        <label class="form-check-label" for="salary-op2">1-2 lacs <span>(300)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="salary-op3" type="radio" name="radio-currency" />
-                                                        <label class="form-check-label" for="salary-op3">2-3 lacs <span>(235)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="salary-op4" type="radio" name="radio-currency" />
-                                                        <label class="form-check-label" for="salary-op4">3-4 lacs <span>(568)</span></label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="salary-op5" type="radio" name="radio-currency" />
-                                                        <label class="form-check-label" for="salary-op5">4-5 lacs <span>(798)</span></label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="panel">
-                                            <div class="acod-head">
-                                                <h6 class="acod-title">
-                                                    <Link data-bs-toggle="collapse" to="#job-function" class="collapsed">
-                                                        Job Function
-                                                    </Link>
-                                                </h6>
-                                            </div>
-                                            <div id="job-function" class="acod-body collapse">
-                                                <div class="acod-content">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="function-services-1" type="radio" name="radio-function" />
-                                                        <label class="form-check-label" for="function-services-1">Production Management <span>(120)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="function-services-2" type="radio" name="radio-function" />
-                                                        <label class="form-check-label" for="function-services-2">Design Engineering <span>(300)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="function-services-3" type="radio" name="radio-function" />
-                                                        <label class="form-check-label" for="function-services-3">Safety/ Health <span>(235)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="function-services-4" type="radio" name="radio-function" />
-                                                        <label class="form-check-label" for="function-services-4">Engineering <span>(568)</span></label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="function-services-5" type="radio" name="radio-function" />
-                                                        <label class="form-check-label" for="function-services-5">Product Development <span>(798)</span></label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="panel">
-                                            <div class="acod-head">
-                                                <h6 class="acod-title">
-                                                    <Link data-bs-toggle="collapse" to="#industry" class="collapsed">
-                                                        Industry
-                                                    </Link>
-                                                </h6>
-                                            </div>
-                                            <div id="industry" class="acod-body collapse">
-                                                <div class="acod-content">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="industry1" type="radio" name="radio-industry" />
-                                                        <label class="form-check-label" for="industry1">Telecom <span>(5)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="industry2" type="radio" name="radio-industry" />
-                                                        <label class="form-check-label" for="industry2">Consulting Services <span>(10)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="industry3" type="radio" name="radio-industry" />
-                                                        <label class="form-check-label" for="industry3">Engineering/Projects <span>(15)</span> </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="industry4" type="radio" name="radio-industry" />
-                                                        <label class="form-check-label" for="industry4">Manufacturing/Industrial <span>(12)</span></label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" id="industry5" type="radio" name="radio-industry" />
-                                                        <label class="form-check-label" for="industry5">Architecture/Interior Design <span>(8)</span></label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </aside>
-                                </div>
-                                <div class="col-xl-9 col-lg-8 col-md-7">
-                                    <div class="job-bx-title clearfix">
-                                        <h5 class="font-weight-700 float-start text-uppercase">2269 Jobs Found</h5>
-                                        <div class="float-end">
-                                            <span class="select-title">Sort by freshness</span>
-                                            <div class="dropdown bootstrap-select dropup"><select class="" tabindex="null">
-                                                <option>Last 2 Months</option>
-                                                <option>Last Months</option>
-                                                <option>Last Weeks</option>
-                                                <option>Last 3 Days</option>
-                                            </select>
-                                                <button type="button" tabindex="-1" class="btn dropdown-toggle btn-light" data-bs-toggle="dropdown" role="combobox" aria-owns="bs-select-2" aria-haspopup="listbox" aria-expanded="false" title="Last 2 Months">
-                                                    <div class="filter-option">
-                                                        <div class="filter-option-inner">
-                                                            <div class="filter-option-inner-inner">Last 2 Months</div>
-                                                        </div>
-                                                    </div>
-                                                </button>
-                                                <div class="dropdown-menu" style={{ maxHeight: "393.667px", overflow: "hidden", minHeight: "124px" }}>
-                                                    <div class="inner show" role="listbox" id="bs-select-2" tabindex="-1" aria-activedescendant="bs-select-2-0" style={{ maxHeight: "373.667px", overflowY: "auto", minHeight: "104px" }}>
-                                                        <ul class="dropdown-menu inner show" role="presentation" style={{ marginTop: "0px", marginBottom: "0px" }}>
-                                                            <li class="selected active">
-                                                                <Link role="option" class="dropdown-item active selected" id="bs-select-2-0" tabindex="0" aria-setsize="4" aria-posinset="1" aria-selected="true">
-                                                                    <span class="text">Last 2 Months</span>
-                                                                </Link>
-                                                            </li>
-                                                            <li>
-                                                                <Link role="option" class="dropdown-item" id="bs-select-2-1" tabindex="0">
-                                                                    <span class="text">Last Months</span>
-                                                                </Link>
-                                                            </li>
-                                                            <li>
-                                                                <Link role="option" class="dropdown-item" id="bs-select-2-2" tabindex="0">
-                                                                    <span class="text">Last Weeks</span>
-                                                                </Link>
-                                                            </li>
-                                                            <li>
-                                                                <Link role="option" class="dropdown-item" id="bs-select-2-3" tabindex="0">
-                                                                    <span class="text">Last 3 Days</span>
-                                                                </Link>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {/* <div class="float-end p-tb5 p-r10">
-                                                <Link to="browse-job-filter-list.html" class="p-lr5"><i class="fa fa-th-list"></i></Link>
-                                                <Link to="browse-job-filter-grid.html" class="p-lr5"><i class="fa fa-th"></i></Link>
-                                            </div> */}
-                                        </div>
-                                    </div>
-                                    <ul class="post-job-bx browse-job-grid row">
-                                        <li class="col-lg-6 col-md-12">
-                                            <div class="post-bx">
-                                                <div class="d-flex m-b30">
-                                                    <div class="job-post-info">
-                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
-                                                        <ul>
-                                                            <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
-                                                            <li><i class="far fa-bookmark"></i> Full Time</li>
-                                                            <li><i class="far fa-clock"></i> Published 11 months ago</li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <div class="job-time me-auto">
-                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
-                                                    </div>
-                                                    <div class="salary-bx">
-                                                        <span>$1200 - $ 2500</span>
-                                                    </div>
-                                                </div>
-                                                <label class="like-btn">
-                                                    <input type="checkbox" class="filled" />
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </div>
-                                        </li>
-                                        <li class="col-lg-6 col-md-12">
-                                            <div class="post-bx">
-                                                <div class="d-flex m-b30">
-                                                    <div class="job-post-info">
-                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
-                                                        <ul>
-                                                            <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
-                                                            <li><i class="far fa-bookmark"></i> Full Time</li>
-                                                            <li><i class="far fa-clock"></i> Published 11 months ago</li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <div class="job-time me-auto">
-                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
-                                                    </div>
-                                                    <div class="salary-bx">
-                                                        <span>$1200 - $ 2500</span>
-                                                    </div>
-                                                </div>
-                                                <label class="like-btn">
-                                                    <input type="checkbox" />
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </div>
-                                        </li>
-                                        <li class="col-lg-6 col-md-12">
-                                            <div class="post-bx">
-                                                <div class="d-flex m-b30">
-                                                    <div class="job-post-info">
-                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
-                                                        <ul>
-                                                            <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
-                                                            <li><i class="far fa-bookmark"></i> Full Time</li>
-                                                            <li><i class="far fa-clock"></i> Published 11 months ago</li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <div class="job-time me-auto">
-                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
-                                                    </div>
-                                                    <div class="salary-bx">
-                                                        <span>$1200 - $ 2500</span>
-                                                    </div>
-                                                </div>
-                                                <label class="like-btn">
-                                                    <input type="checkbox" />
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </div>
-                                        </li>
-                                        <li class="col-lg-6 col-md-12">
-                                            <div class="post-bx">
-                                                <div class="d-flex m-b30">
-                                                    <div class="job-post-info">
-                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
-                                                        <ul>
-                                                            <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
-                                                            <li><i class="far fa-bookmark"></i> Full Time</li>
-                                                            <li><i class="far fa-clock"></i> Published 11 months ago</li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <div class="job-time me-auto">
-                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
-                                                    </div>
-                                                    <div class="salary-bx">
-                                                        <span>$1200 - $ 2500</span>
-                                                    </div>
-                                                </div>
-                                                <label class="like-btn">
-                                                    <input type="checkbox" />
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </div>
-                                        </li>
-                                        <li class="col-lg-6 col-md-12">
-                                            <div class="post-bx">
-                                                <div class="d-flex m-b30">
-                                                    <div class="job-post-info">
-                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
-                                                        <ul>
-                                                            <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
-                                                            <li><i class="far fa-bookmark"></i> Full Time</li>
-                                                            <li><i class="far fa-clock"></i> Published 11 months ago</li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <div class="job-time me-auto">
-                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
-                                                    </div>
-                                                    <div class="salary-bx">
-                                                        <span>$1200 - $ 2500</span>
-                                                    </div>
-                                                </div>
-                                                <label class="like-btn">
-                                                    <input type="checkbox" />
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </div>
-                                        </li>
-                                        <li class="col-lg-6 col-md-12">
-                                            <div class="post-bx">
-                                                <div class="d-flex m-b30">
-                                                    <div class="job-post-info">
-                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
-                                                        <ul>
-                                                            <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
-                                                            <li><i class="far fa-bookmark"></i> Full Time</li>
-                                                            <li><i class="far fa-clock"></i> Published 11 months ago</li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <div class="job-time me-auto">
-                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
-                                                    </div>
-                                                    <div class="salary-bx">
-                                                        <span>$1200 - $ 2500</span>
-                                                    </div>
-                                                </div>
-                                                <label class="like-btn">
-                                                    <input type="checkbox" />
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </div>
-                                        </li>
-                                        <li class="col-lg-6 col-md-12">
-                                            <div class="post-bx">
-                                                <div class="d-flex m-b30">
-                                                    <div class="job-post-info">
-                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
-                                                        <ul>
-                                                            <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
-                                                            <li><i class="far fa-bookmark"></i> Full Time</li>
-                                                            <li><i class="far fa-clock"></i> Published 11 months ago</li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <div class="job-time me-auto">
-                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
-                                                    </div>
-                                                    <div class="salary-bx">
-                                                        <span>$1200 - $ 2500</span>
-                                                    </div>
-                                                </div>
-                                                <label class="like-btn">
-                                                    <input type="checkbox" />
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </div>
-                                        </li>
-                                        <li class="col-lg-6 col-md-12">
-                                            <div class="post-bx">
-                                                <div class="d-flex m-b30">
-                                                    <div class="job-post-info">
-                                                        <h5><Link to="/job-deails">Digital Marketing Executive</Link></h5>
-                                                        <ul>
-                                                            <li><i class="fas fa-map-marker-alt"></i> Sacramento, California</li>
-                                                            <li><i class="far fa-bookmark"></i> Full Time</li>
-                                                            <li><i class="far fa-clock"></i> Published 11 months ago</li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <div class="job-time me-auto">
-                                                        <Link to="javascript:void(0);"><span>Full Time</span></Link>
-                                                    </div>
-                                                    <div class="salary-bx">
-                                                        <span>$1200 - $ 2500</span>
-                                                    </div>
-                                                </div>
-                                                <label class="like-btn">
-                                                    <input type="checkbox" />
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                    <div class="pagination-bx float-end m-t30">
-                                        <ul class="pagination">
-                                            <li class="previous"><Link to="javascript:void(0);"><i class="ti-arrow-left"></i> Prev</Link></li>
-                                            <li class="active"><Link to="javascript:void(0);">1</Link></li>
-                                            <li><Link to="javascript:void(0);">2</Link></li>
-                                            <li><Link to="javascript:void(0);">3</Link></li>
-                                            <li class="next"><Link to="javascript:void(0);">Next <i class="ti-arrow-right"></i></Link></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {/* <!-- Browse Jobs END --> */}
                 </div>
             </div>
         </>

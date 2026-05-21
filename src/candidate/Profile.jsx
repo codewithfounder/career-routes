@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../config/api";
-
 import Sidebar from "./sidebar/Sidebar";
 
-function Profile() {
+function Profile({ setNotification }) {  // Add setNotification as prop
     const { id } = useParams();
+    const navigate = useNavigate();
 
     const [user, setUser] = useState(null);
     const [countries, setCountries] = useState([]);
@@ -17,21 +17,77 @@ function Profile() {
 
     const [industries, setIndustries] = useState([]);
     const [departments, setDepartments] = useState([]);
+    const [loadingDepartments, setLoadingDepartments] = useState(false);
 
     useEffect(() => {
-        fetch(`${BASE_URL}/auth/profile/${id}`)
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    setUser(data.user);
-                    setSelectedCountry(data.user.Country || "");
-                    setSelectedState(data.user.State || "");
-                }
-            })
-            .catch((error) => {
-                console.log("Profile error ", error);
-            });
+        fetchProfile();
     }, [id]);
+
+    const fetchProfile = async () => {
+        try {
+            const response = await fetch(`${BASE_URL}/auth/profile/${id}`);
+            const data = await response.json();
+            
+            if (data.status) {
+                setUser(data.user);
+                setSelectedCountry(data.user.Country || "");
+                setSelectedState(data.user.State || "");
+                
+                if (data.user.Industry && data.user.Industry != '') {
+                    fetchDepartmentsByIndustry(data.user.Industry);
+                }
+            } else {
+                if (data.message === "Session expired. Please login again." || 
+                    data.message === "Invalid token") {
+                    setNotification({
+                        show: true,
+                        status: false,
+                        message: "Your session has expired. Please login again."
+                    });
+                    localStorage.removeItem("auth_token");
+                    localStorage.removeItem("user_data");
+                    setTimeout(() => navigate("/login"), 2000);
+                } else {
+                    setNotification({
+                        show: true,
+                        status: false,
+                        message: data.message || "Failed to load profile"
+                    });
+                }
+            }
+        } catch (error) {
+            console.log("Profile error ", error);
+            setNotification({
+                show: true,
+                status: false,
+                message: "Failed to load profile"
+            });
+        }
+    };
+
+    const fetchDepartmentsByIndustry = async (industryId) => {
+        if (!industryId || industryId === '') {
+            setDepartments([]);
+            return;
+        }
+        
+        setLoadingDepartments(true);
+        try {
+            const response = await fetch(`${BASE_URL}/auth/departments?industry_id=${industryId}`);
+            const data = await response.json();
+            
+            if (data.status) {
+                setDepartments(data.data);
+            } else {
+                setDepartments([]);
+            }
+        } catch (error) {
+            console.log("Department error:", error);
+            setDepartments([]);
+        } finally {
+            setLoadingDepartments(false);
+        }
+    };
 
     useEffect(() => {
         fetch("https://countriesnow.space/api/v0.1/countries/positions")
@@ -43,6 +99,11 @@ function Profile() {
             })
             .catch((error) => {
                 console.log("Country error:", error);
+                setNotification({
+                    show: true,
+                    status: false,
+                    message: "Failed to load countries"
+                });
             });
     }, []);
 
@@ -64,14 +125,29 @@ function Profile() {
             })
             .catch((error) => {
                 console.log("State error:", error);
+                setNotification({
+                    show: true,
+                    status: false,
+                    message: "Failed to load states"
+                });
             });
     }, [selectedCountry]);
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
+        
         setUser({
             ...user,
-            [e.target.name]: e.target.value,
+            [name]: value,
         });
+        
+        if (name === 'Industry') {
+            fetchDepartmentsByIndustry(value);
+            setUser(prev => ({
+                ...prev,
+                Department: ''
+            }));
+        }
     };
 
     const handleUpdateProfile = async (e) => {
@@ -91,13 +167,37 @@ function Profile() {
             const data = await response.json();
 
             if (data.status) {
-                alert(data.message || "Profile updated successfully");
+                setNotification({
+                    show: true,
+                    status: true,
+                    message: data.message || "Profile updated successfully!"
+                });
+                fetchProfile(); // Refresh profile data
             } else {
-                alert(data.message || "Profile update failed");
+                if (data.message === "Session expired. Please login again.") {
+                    setNotification({
+                        show: true,
+                        status: false,
+                        message: "Your session has expired. Please login again."
+                    });
+                    localStorage.removeItem("auth_token");
+                    localStorage.removeItem("user_data");
+                    setTimeout(() => navigate("/login"), 2000);
+                } else {
+                    setNotification({
+                        show: true,
+                        status: false,
+                        message: data.message || "Profile update failed"
+                    });
+                }
             }
         } catch (error) {
             console.log("Update profile error:", error);
-            alert("Server error");
+            setNotification({
+                show: true,
+                status: false,
+                message: "Server error. Please try again."
+            });
         } finally {
             setLoading(false);
         }
@@ -109,23 +209,24 @@ function Profile() {
             .then((data) => {
                 if (data.status) {
                     setIndustries(data.data);
+                } else {
+                    setNotification({
+                        show: true,
+                        status: false,
+                        message: "Failed to load industries"
+                    });
                 }
             })
             .catch((error) => {
                 console.log("Industry error:", error);
-            });
-
-        fetch(`${BASE_URL}/auth/departments`)
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status) {
-                    setDepartments(data.data);
-                }
-            })
-            .catch((error) => {
-                console.log("Department error:", error);
+                setNotification({
+                    show: true,
+                    status: false,
+                    message: "Failed to load industries"
+                });
             });
     }, []);
+
     return (
         <>
             <div className="page-content bg-white">
@@ -280,7 +381,6 @@ function Profile() {
                                                                 value={selectedState}
                                                                 onChange={(e) => {
                                                                     setSelectedState(e.target.value);
-
                                                                     setUser({
                                                                         ...user,
                                                                         State: e.target.value,
@@ -352,21 +452,6 @@ function Profile() {
                                                 <div className="row">
                                                     <div className="col-lg-6 col-md-6">
                                                         <div className="form-group">
-                                                            <label>Designation:</label>
-                                                            <input
-                                                                type="text"
-                                                                name="Designation"
-                                                                value={user.Designation || ""}
-                                                                onChange={handleChange}
-                                                                className="form-control"
-                                                                placeholder="Designation"
-                                                                required
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="col-lg-6 col-md-6">
-                                                        <div className="form-group">
                                                             <label>Current Company:</label>
                                                             <input
                                                                 type="text"
@@ -375,22 +460,21 @@ function Profile() {
                                                                 onChange={handleChange}
                                                                 className="form-control"
                                                                 placeholder="Current Company"
-                                                                required
                                                             />
                                                         </div>
                                                     </div>
 
                                                     <div className="col-lg-6 col-md-6">
                                                         <div className="form-group">
-                                                            <label>Total Experience:</label>
+                                                            <label>Total Experience (Years):</label>
                                                             <input
-                                                                type="text"
+                                                                type="number"
+                                                                step="0.5"
                                                                 name="Experience"
                                                                 value={user.Experience || ""}
                                                                 onChange={handleChange}
                                                                 className="form-control"
                                                                 placeholder="Enter Total Experience"
-                                                                required
                                                             />
                                                         </div>
                                                     </div>
@@ -403,11 +487,10 @@ function Profile() {
                                                                 value={user.Industry || ""}
                                                                 onChange={handleChange}
                                                                 className="form-control"
-                                                                required
                                                             >
                                                                 <option value="">Select Industry</option>
                                                                 {industries.map((item) => (
-                                                                    <option key={item.id} value={item.name}>
+                                                                    <option key={item.id} value={item.id}>
                                                                         {item.name}
                                                                     </option>
                                                                 ))}
@@ -418,34 +501,43 @@ function Profile() {
                                                     <div className="col-lg-6 col-md-6">
                                                         <div className="form-group">
                                                             <label>Department:</label>
-                                                            <input
-                                                                type="text"
+                                                            <select
                                                                 name="Department"
                                                                 value={user.Department || ""}
                                                                 onChange={handleChange}
                                                                 className="form-control"
-                                                                required
-                                                            />
+                                                                disabled={loadingDepartments}
+                                                            >
+                                                                <option value="">Select Department</option>
+                                                                {departments.map((item) => (
+                                                                    <option key={item.id} value={item.id}>
+                                                                        {item.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                            {loadingDepartments && (
+                                                                <small className="text-muted">Loading departments...</small>
+                                                            )}
                                                         </div>
                                                     </div>
 
                                                     <div className="col-lg-6 col-md-6">
                                                         <div className="form-group">
-                                                            <label>Skills:</label>
+                                                            <label>Skills (comma separated):</label>
                                                             <input
                                                                 type="text"
                                                                 name="Skills"
                                                                 value={user.Skills || ""}
                                                                 onChange={handleChange}
                                                                 className="form-control"
-                                                                required
+                                                                placeholder="e.g., PHP, JavaScript, React"
                                                             />
                                                         </div>
                                                     </div>
 
                                                     <div className="col-lg-6 col-md-6">
                                                         <div className="form-group">
-                                                            <label>Current Salary CTC:</label>
+                                                            <label>Current Salary (LPA):</label>
                                                             <input
                                                                 type="text"
                                                                 name="Current_salary"
@@ -453,14 +545,13 @@ function Profile() {
                                                                 onChange={handleChange}
                                                                 className="form-control"
                                                                 placeholder="Enter Your Current Salary"
-                                                                required
                                                             />
                                                         </div>
                                                     </div>
 
                                                     <div className="col-lg-6 col-md-6">
                                                         <div className="form-group">
-                                                            <label>Expected Salary CTC:</label>
+                                                            <label>Expected Salary (LPA):</label>
                                                             <input
                                                                 type="text"
                                                                 name="Expected_salary"
@@ -468,7 +559,6 @@ function Profile() {
                                                                 onChange={handleChange}
                                                                 className="form-control"
                                                                 placeholder="Enter Your Expected Salary"
-                                                                required
                                                             />
                                                         </div>
                                                     </div>
@@ -480,17 +570,25 @@ function Profile() {
                                                     </h5>
                                                 </div>
 
-                                                <div className="col-lg-12 col-md-12">
-                                                    <div className="form-group">
-                                                        <label>Highest Qualification:</label>
-                                                        <select name="Highest_qualification" value={user.Highest_qualification || ""} onChange={handleChange} className="form-control" required>
-                                                            <option value="">Select Qualification</option>
-                                                            <option value="10th">10th</option>
-                                                            <option value="12th">12th</option>
-                                                            <option value="Graduation">Graduation</option>
-                                                            <option value="Masters">Masters</option>
-                                                            <option value="Doctoral">Doctoral</option>
-                                                        </select>
+                                                <div className="row">
+                                                    <div className="col-lg-12 col-md-12">
+                                                        <div className="form-group">
+                                                            <label>Highest Qualification:</label>
+                                                            <select 
+                                                                name="Highest_qualification" 
+                                                                value={user.Highest_qualification || ""} 
+                                                                onChange={handleChange} 
+                                                                className="form-control" 
+                                                                required
+                                                            >
+                                                                <option value="">Select Qualification</option>
+                                                                <option value="10th">10th</option>
+                                                                <option value="12th">12th</option>
+                                                                <option value="Graduation">Graduation</option>
+                                                                <option value="Masters">Masters</option>
+                                                                <option value="Doctoral">Doctoral</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
 

@@ -16,7 +16,7 @@ function HiringBanner() {
                 <div className="banner-left">
 
                     <img
-                        src="/images/banner.webp"
+                        src="/images/man4.png"
                         alt="People"
                     />
 
@@ -27,7 +27,7 @@ function HiringBanner() {
                 <div className="banner-right">
 
                     <div className="tag">
-                        APNA FOR EMPLOYERS
+                        Career Routes FOR EMPLOYERS
                     </div>
 
                     <h1>

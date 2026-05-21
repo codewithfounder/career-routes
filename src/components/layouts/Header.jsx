@@ -1,6 +1,122 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+// import { useToast } from "../context/ToastContext";
+import { useToast } from "../../context/ToastContext";
+
 
 function Header() {
+    const navigate = useNavigate();
+    const { showToast } = useToast();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userName, setUserName] = useState("");
+    const [userImage, setUserImage] = useState("");
+     const [token, setToken] = useState(null);
+
+    // Check login status
+    const checkLoginStatus = () => {
+        const token = localStorage.getItem("auth_token");
+        const isLoggedInStatus = !!token;
+        
+        setIsLoggedIn(isLoggedInStatus);
+        setToken(token);
+        
+        // Get user name from localStorage if available
+        if (token) {
+            const userData = localStorage.getItem("user_data");
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    setUserName(user.name || user.Full_name || "User");
+                    setUserImage(user.Profile_image || "");
+                } catch (e) {
+                    console.log("Error parsing user data:", e);
+                }
+            } else {
+                // If no user data, try to fetch it
+                fetchUserProfile(token);
+            }
+        } else {
+            setUserName("");
+            setUserImage("");
+        }
+    };
+
+    const fetchUserProfile = async (token) => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL || ''}/auth/profile/${token}`);
+            const data = await response.json();
+            
+            if (data.status) {
+                setUserName(data.user.Full_name || "User");
+                setUserImage(data.user.Profile_image || "");
+                // Store in localStorage for future use
+                localStorage.setItem("user_data", JSON.stringify(data.user));
+            }
+        } catch (error) {
+            console.log("Error fetching user profile:", error);
+        }
+    };
+
+    useEffect(() => {
+        checkLoginStatus();
+        
+        // Listen for storage events (when logout happens in another tab)
+        const handleStorageChange = (e) => {
+            if (e.key === 'auth_token' || e.key === 'user_data') {
+                checkLoginStatus();
+            }
+        };
+        window.addEventListener("storage", handleStorageChange);
+        
+        // Custom event for login/logout within the same tab
+        const handleAuthChange = () => {
+            console.log("Auth change detected, updating header...");
+            checkLoginStatus();
+        };
+        window.addEventListener("authChange", handleAuthChange);
+        
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+            window.removeEventListener("authChange", handleAuthChange);
+        };
+    }, []);
+
+    const handleLogout = async () => {
+        const confirmLogout = window.confirm("Are you sure you want to logout?");
+        
+        if (confirmLogout) {
+            try {
+                const token = localStorage.getItem("auth_token");
+                
+                // Call backend logout if you have the endpoint
+                if (token) {
+                    await fetch(`${process.env.REACT_APP_API_URL || ''}/auth/logout`, {
+                        method: "POST",
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }).catch(err => console.log("Logout API error:", err));
+                }
+            } catch (error) {
+                console.log("Logout error:", error);
+            }
+            
+            // Clear localStorage
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("user_data");
+            
+            // Dispatch custom event to update other components
+            window.dispatchEvent(new Event("authChange"));
+            
+            // Show toast notification
+            showToast("Logged out successfully!", "success");
+            
+            // Redirect to home page
+            navigate("/");
+        }
+    };
+
     return (
         <>
             <header className="site-header mo-left header fullwidth">
@@ -11,16 +127,24 @@ function Header() {
                             {/* <!-- Website Logo --> */}
                             <div className="logo-header mostion logo-dark">
                                 <Link to="/">
-                                    <img alt="" src="images/logo1.png" />
+                                    <img alt="" src="/images/logo1.png" />
                                 </Link>
                             </div>
                             <div className="logo-header mostion logo-white">
                                 <Link to="/">
-                                    <img alt="" src="images/logo-white.png" />
+                                    <img alt="" src="/images/logo-white.png" />
                                 </Link>
                             </div>
                             {/* <!-- Nav Toggle Button --> */}
-                            <button aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation" className="navbar-toggler collapsed navicon justify-content-end" data-bs-target="#navbarNavDropdown" data-bs-toggle="collapse" type="button">
+                            <button 
+                                aria-controls="navbarNavDropdown" 
+                                aria-expanded="false" 
+                                aria-label="Toggle navigation" 
+                                className="navbar-toggler collapsed navicon justify-content-end" 
+                                data-bs-target="#navbarNavDropdown" 
+                                data-bs-toggle="collapse" 
+                                type="button"
+                            >
                                 <span></span>
                                 <span></span>
                                 <span></span>
@@ -28,19 +152,69 @@ function Header() {
                             {/* <!-- Extra Nav --> */}
                             <div className="extra-nav">
                                 <div className="extra-cell">
-                                    {/* <Link className="layout-btn" to="javascript:void(0);">
-                                        <input type="checkbox" />
-                                        <span className="mode-label">
-                                        </span>
-                                    </Link> */}
-                                    <a href="https://websmileindia.in/CAREERROUTES/admin/auth/signin" className="text-dark" target="_blank">
-                                        {/* <i className="fa fa-user"></i> */}
+                                    <a 
+                                        href="https://websmileindia.in/CAREERROUTES/admin/auth/signin" 
+                                        className="btn text-light bg-dark" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                    >
                                         Employer Login
                                     </a>
-                                    <Link className="site-button" to="/login">
-                                        {/* <i className="fa fa-lock"></i> */}
-                                        Candidate Login
-                                    </Link>
+                                    
+                                    {isLoggedIn ? (
+                                        <div className="dropdown" style={{ display: "inline-block", marginLeft: "10px" }}>
+                                            <button 
+                                                className="site-button dropdown-toggle" 
+                                                type="button" 
+                                                id="userDropdown" 
+                                                data-bs-toggle="dropdown" 
+                                                aria-expanded="false"
+                                                style={{ background: "#4c8dff", border: "none" }}
+                                            >
+                                                <i className="fa fa-user-circle mx-1"></i>
+                                                {userName ? userName.slice(0, 15) : "Profile"}
+                                            </button>
+                                            <ul className="dropdown-menu" aria-labelledby="userDropdown">
+                                                <li>
+                                                    <Link className="dropdown-item" to={`/profile/${token}`}>
+                                                        <i className="fa fa-user"></i> My Profile
+                                                    </Link>
+                                                </li>
+                                                <li>
+                                                    <Link className="dropdown-item" to={`/profile/${token}/applied-jobs`}>
+                                                        <i className="fa fa-briefcase"></i> Applied Jobs
+                                                    </Link>
+                                                </li>
+                                                <li>
+                                                    <Link className="dropdown-item" to={`/profile/${token}/saved-jobs`}>
+                                                        <i className="fa fa-heart"></i> Saved Jobs
+                                                    </Link>
+                                                </li>
+                                                <li>
+                                                    <Link className="dropdown-item" to={`/profile/${token}/change-password`}>
+                                                        <i className="fa fa-key"></i> Change Password
+                                                    </Link>
+                                                </li>
+                                                <li><hr className="dropdown-divider" /></li>
+                                                <li>
+                                                    <button 
+                                                        className="dropdown-item" 
+                                                        onClick={handleLogout}
+                                                        style={{ color: "#dc3545" }}
+                                                    >
+                                                        <i className="fa fa-sign-out-alt"></i> Logout
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    ) : (
+                                        <Link
+                                            className="site-button"
+                                            to="/login"
+                                        >
+                                            Candidate Login
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                             {/* <!-- Main Nav --> */}
@@ -56,13 +230,8 @@ function Header() {
                                     </Link>
                                 </div>
                                 <ul className="nav navbar-nav">
-                                    {/* <li>
-                                        <Link to="/">
-                                            Home
-                                        </Link>
-                                    </li> */}
                                     <li>
-                                        <Link to="/browse-jobs">
+                                        <Link to="/about">
                                             About Us
                                         </Link>
                                     </li>
@@ -72,296 +241,15 @@ function Header() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link to="/browse-jobs">
+                                        <Link to="/companies">
                                             Companies
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link to="/browse-jobs">
+                                        <Link to="/pricing">
                                             Pricing
                                         </Link>
                                     </li>
-                                    {/* <li>
-                                        <Link to="javascript:void(0);">
-                                            For Employers
-                                            <i className="fa fa-chevron-down">
-                                            </i>
-                                        </Link>
-                                        <ul className="sub-menu">
-                                            <li>
-                                                <Link className="dez-page" to="company-profile.html">
-                                                    Company Profile
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="company-resume.html">
-                                                    Employer Resume
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="company-post-jobs.html">
-                                                    Post A Jobs
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="company-manage-job.html">
-                                                    Manage jobs
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="company-transactions.html">
-                                                    Transactions
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="browse-candidates.html">
-                                                    Browse Candidates
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="javascript:void(0);">
-                                                    Register
-                                                    <i className="fa fa-angle-right">
-                                                    </i>
-                                                </Link>
-                                                <ul className="sub-menu">
-                                                    <li>
-                                                        <Link className="dez-page" to="create-account.html">
-                                                            Employers Register
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="account-fresher.html">
-                                                            Register Fresher
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="account-professional.html">
-                                                            Register Professional
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li> */}
-                                    {/* <li>
-                                        <Link to="javascript:void(0);">
-                                            Pages
-                                            <i className="fa fa-chevron-down">
-                                            </i>
-                                        </Link>
-                                        <ul className="sub-menu">
-                                            <li>
-                                                <Link className="dez-page" to="about-us.html">
-                                                    About Us
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="job-detail.html">
-                                                    Job Detail
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="companies.html">
-                                                    companies
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="free-job-alerts.html">
-                                                    free job alerts
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="javascript:void(0);">
-                                                    Browse Job
-                                                    <i className="fa fa-angle-right">
-                                                    </i>
-                                                </Link>
-                                                <ul className="sub-menu">
-                                                    <li>
-                                                        <Link className="dez-page" to="browse-job-list.html">
-                                                            browse job list
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="browse-job-grid.html">
-                                                            browse job grid
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="browse-job-filter-list.html">
-                                                            browse filter list
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="browse-job-filter-grid.html">
-                                                            browse filter grid
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="javascript:void(0);">
-                                                    Jobs
-                                                    <i className="fa fa-angle-right">
-                                                    </i>
-                                                </Link>
-                                                <ul className="sub-menu">
-                                                    <li>
-                                                        <Link className="dez-page" to="category-all-jobs.html">
-                                                            all jobs
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="category-company-jobs.html">
-                                                            company jobs
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="category-designations-jobs.html">
-                                                            designations jobs
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="category-jobs.html">
-                                                            category jobs
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="category-location-jobs.html">
-                                                            location jobs
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="category-skill-jobs.html">
-                                                            skill jobs
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="javascript:void(0);">
-                                                    Portfolio
-                                                    <i className="fa fa-angle-right">
-                                                    </i>
-                                                </Link>
-                                                <ul className="sub-menu">
-                                                    <li>
-                                                        <Link className="dez-page" to="portfolio-grid-2.html">
-                                                            Portfolio Grid 2
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="portfolio-grid-3.html">
-                                                            Portfolio Grid 3
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="portfolio-grid-4.html">
-                                                            Portfolio Grid 4
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="javascript:void(0);">
-                                                    Login
-                                                    <i className="fa fa-angle-right">
-                                                    </i>
-                                                </Link>
-                                                <ul className="sub-menu">
-                                                    <li>
-                                                        <Link className="dez-page" to="login.html">
-                                                            login 1
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="login-2.html">
-                                                            login 2
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="login-3.html">
-                                                            login 3
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="javascript:void(0);">
-                                                    register
-                                                    <i className="fa fa-angle-right">
-                                                    </i>
-                                                </Link>
-                                                <ul className="sub-menu">
-                                                    <li>
-                                                        <Link className="dez-page" to="register.html">
-                                                            register 1
-                                                        </Link>
-                                                    </li>
-                                                    <li>
-                                                        <Link className="dez-page" to="register-2.html">
-                                                            register 2
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="error-404.html">
-                                                    Error 404
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="coming-soon.html">
-                                                    Coming Soon
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="contact.html">
-                                                    Contact Us
-                                                </Link>
-                                            </li>
-                                        </ul>
-                                    </li> */}
-                                    {/* <li>
-                                        <Link to="javascript:void(0);">
-                                            Blog
-                                            <i className="fa fa-chevron-down">
-                                            </i>
-                                        </Link>
-                                        <ul className="sub-menu">
-                                            <li>
-                                                <Link className="dez-page" to="blog-classic.html">
-                                                    Classic
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="blog-classic-sidebar.html">
-                                                    Classic Sidebar
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="blog-detailed-grid.html">
-                                                    Detailed Grid
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="blog-detailed-grid-sidebar.html">
-                                                    Detailed Grid Sidebar
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="blog-left-img.html">
-                                                    Left Image Sidebar
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link className="dez-page" to="blog-details.html">
-                                                    Blog Details
-                                                </Link>
-                                            </li>
-                                        </ul>
-                                    </li> */}
                                 </ul>
                             </div>
                         </div>

@@ -102,7 +102,7 @@ function TrendingJobs() {
                                 <div className="job-card-left">
 
                                     <div className="job-icon-circle">
-                                        {/* <i class={`${job.icon}`}></i> */}
+                                        {/* <i className={`${job.icon}`}></i> */}
                                         <img src={job.icon} alt={job.icon} />
                                     </div>
 
